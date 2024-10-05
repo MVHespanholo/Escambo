@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  DISPONIVEL
+  PENDENTE
+  CONCLUIDO
+  CANCELADO
+}
+
+model Usuario {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  nome            String
+  cpf             String
+  email           String
+  senha           String
+  dataCadastro    DateTime
+  logradouro      String
+  numero          Int
+  cep             String
+  bairro          String
+  municipio       String
+  produtoServicos ProdutoServico[] @relation("UsuarioProdutoServico")
+  trocas          Trocas[]         @relation("UsuarioTrocas")
+
+}
+
+model ProdutoServico {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  usuarioId       String      @db.ObjectId
+  usuario         Usuario     @relation(fields: [usuarioId], references: [id], name: "UsuarioProdutoServico")
+  nome            String
+  descricao       String
+  categoria       String
+  foto            String
+  dataPostagem    DateTime
+  status          String
+  trocas          Trocas[]    @relation("ProdutoServicoTrocas")
+}
+
+model Mensagens {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  usuarioId       String?     @db.ObjectId
+  mensagem        String
+  data            DateTime
+  
+}
+
+model Trocas {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  produtoServicoId String         @db.ObjectId
+  produtoServico  ProdutoServico  @relation(fields: [produtoServicoId], references: [id], name: "ProdutoServicoTrocas")
+  usuario1Id      String          @db.ObjectId
+  usuario1        Usuario         @relation(fields: [usuario1Id], references: [id], name: "UsuarioTrocas")
+  usuario2Id      String?         @db.ObjectId
+  // usuario2        Usuario?        @relation(fields: [usuario2Id], references: [id])
+  status          Status          
+}
+
+model Avaliacoes {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  usuarioId        String      @db.ObjectId
+  mensagem         String
+  data             DateTime
+
+}
+
+model API {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  usuarioId        String      @db.ObjectId   
+  endpoint         String
+  localizacao      String
+  dataVerificacao  DateTime  
+}
+
